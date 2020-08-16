@@ -1,0 +1,19 @@
+title: IPOCS for Model Railway
+lang: en
+description: Documentation for IPOCS for Model Railway
+
+remote_theme: rundocs/jekyll-rtd-theme # rundocs/jekyll-theme-docsify
+
+edit: true
+addons_branch: true
+
+addons:
+  - github
+  - plugins
+  - analytics
+
+copyright:
+  revision: true
+
+readme_index:
+  with_frontmatter: true
