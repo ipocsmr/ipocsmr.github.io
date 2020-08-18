@@ -15,5 +15,8 @@ addons:
 copyright:
   revision: true
 
+include:
+  - contributing.md
+
 readme_index:
   with_frontmatter: true
