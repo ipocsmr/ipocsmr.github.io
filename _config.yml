@@ -17,6 +17,11 @@ copyright:
 
 include:
   - contributing.md
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - LICENSE
+  - _config.yml
 
 readme_index:
   with_frontmatter: true
