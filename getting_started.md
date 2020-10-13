@@ -14,77 +14,54 @@ Note though that we do not use the Arduino IDE, but rather PlatformIO.
 This page will take a top down approach to describing what you need to do to get
 the system up and running. We will assume that you will integrate with JMRI.
 
+If you feel that something is missing, could be clarified or should be changed
+in another way - please file a ticket on one of our repositories.
+
 ### Prerequisits
 
 * JMRI
-* MQTT broker
 
 ### Configuring JMRI
 
-#### MQTT broker
-
-This one is really up to you - any broker will do. JMRI does require it to be
-running when it is started.
-
 #### The system connection
 
-To connect IPOCSMR to JMRI you need to set up a MQTT connection in JMRI.
-The receive topics for each type of object you intent to use must be seperate
-from the send topics. For turnouts, for example, the receive topic could be
-`track/turnout/{0}/state` and the send topic `track/turnout/{0}`.
-If `{0}` is at the end of a topic, it can be omitted. `{0}` will be replaced by
-JMRI during operation for the system name of the turnout (or other object).
+
+Starting with JMRI 4.21.4 IPOCS has a system connection in JMRI that you can use
+to connect the concentrator units to JMRI.
+
+By default, mDNS/ZeroConf/Bonjour is used to tell the concentrator units where
+to connect to. Changeing the port is optional, but possible if you have
+something else already using the default port. 
 
 #### Configuring objects
 
-##### Turnout
-
-A turnout should be configured as `MONITORING` to allow it to be updated from
-the status sent by IPOCSMR.
-
-##### Other objects
-
-No special settings are needed.
-
-### Protocol translation gateway
-
-IPOCSMR uses a [binary protocol][ipocs] over wifi, not MQTT. Because of this a
-translation service needs to be running on a machine. We call this service
-`IPOCS.JMRI`. This is a self-contained .NET Core application and should thus run
-just about anywhere.
-
-You can download it off it's [GitHub Releases][ijr] page.
-
-As for configuration, it need the IPOCSMR configuration file (described later),
-the JMRI profile for the system it will translate for, which panel file is to
-be used and the address to the MQTT host.
-
-This data then goes into the `appconfig.json` file located inside the
-distribution.
-
-```json
-{
-  "jmriProfile": "./",
-  "jmriPanelFile":  "panel.xml",
-  "ipocsConfig": "config.xml",
-  "mqttHost": "localhost"
-}
-```
-
-You can then start it by running the `IPOCS.JMRI` executable (how you do this
-depends on your OS).
-
-[ijr]: https://github.com/ipocsmr/ipocs.jmri/releases
-[ipocs]: https://github.com/ipocsmr/documentation/blob/master/IPOCS.md
+When creating an object, the JMRI User Name is the name IPOCS uses to address
+objects. Make sure that the IPOCS name aligns with the JMRI User Name, other
+than that - there's nothing special to configure. 
 
 #### Object controller configuration
 
 To create the IPOCSMR configuration, use the ipocs_dpt software, obtainable
 from it's repositories [GitHub Releases][dptrel] page.
 
-[dptrel]: https://github.com/ipocsmr/ipocs_dpt/releases
+[dptrel]: https://github.com/ipocsmr/ipocs.dpt/releases
 
-The ipocs_dpt (Data Preparation Tool) will be explained in more detail in the future.
+The ipocs.dpt (Data Preparation Tool) will be explained in more detail in the future.
+
+### Hardware
+
+We now support both a single ESP32 unit or a ESP8266 and an Arduino working as a
+pair.
+The ESP32 has mostly the same capabilities as the ESP8266/Arduino combination.
+
+#### Preparing a ESP32
+
+Download and flash, an initial version of IPOCS. Most ESP32 controllers come
+pre-loaded with an application to allow flashing over WiFi. If your's doesn't - 
+connect the USB and flash that way.
+
+Note: Flash the filesystem (spiffs) first as this is required for the
+configuration portal to work.
 
 #### Preparing a ESP8266/Arduino pair
 
@@ -105,15 +82,19 @@ Assuming you've done all the wiring of your objects to the Arduino Uno or Mega,
 you also need to connect the first serial ports of the ESP and Arduino to allow
 them to communicate with eachother during runtime.
 
-##### First boot
+### First boot
 
 When the ESP does not have a network configured or cannot connect to the
-previous one it will, after a timeout of about 30 seconds, start a softAP. If you connect to this AP
-and enter `192.168.4.1` into your browser, you will come to a configuration
-portal for the system. This portal is available later as well, but the IP will
-depend on the network you connect it to, as it will be obtained using DHCP.
+previous one it will, after a timeout of about 30 seconds, start a softAP.
+If you connect to this AP and enter `192.168.4.1` into your browser, you will
+come to a configuration portal for the system. This portal is available later as
+well, but the IP will depend on the network you connect it to, as it will be
+obtained using DHCP.
 
-The minimum to configure here now is UnitID, the boards identity, and network
-settings. The Site Data will be automatically updated when it connects to
-IPOCS.JMRI.
+The minimum to configure here now is Concentrator Unit Name, which is the board
+identity, and networ settings. The Site Data will be automatically updated when
+it connects to IPOCS.DPT.
 
+Note: The system connection in JMRI does not currently support automatically
+updating the onboard Site Data. It is strongly suggested that you use IPOCS.DPT
+to test your new layout configuration before using JMRI.
